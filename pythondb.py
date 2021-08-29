@@ -24,7 +24,7 @@ connection.execute("PRAGMA foreign_keys = ON")
 def display_theatres():
     #Select name of all students
     #Set names as an arry contatining all names
-    names = cursor.execute("SELECT theatre_name FROM theatres")
+    names = cursor.execute("SELECT theatre_name FROM theatre")
     
     #Nice formating i for side numbers
     i = 1
@@ -63,7 +63,7 @@ def add_movie():
         display_theatres()
         theatre = int(input("Enter movie thearte num: "))
         if theatre >= 1 and theatre <= 3:
-            theatre_query = cursor.execute("SELECT theatre_tickets FROM theatres WHERE theatre_id = ?", (theatre,))
+            theatre_query = cursor.execute("SELECT theatre_tickets FROM theatre WHERE theatre_id = ?", (theatre,))
             for m in theatre_query:
                 theatre_tickets = m[0]
         
@@ -75,7 +75,7 @@ def add_movie():
         if confirm_movie == "yes":
             print("hellop")
             #Execute the query    
-            cursor.execute("INSERT INTO movies (movie_name, movie_price, movie_time,movie_theatre,movie_tickets) VALUES (?,?,?,?,?)", (movie_name,movie_price,movie_time,theatre,theatre_tickets))
+            cursor.execute("INSERT INTO movie (movie_name, movie_price, movie_time,theatre_id,movie_tickets) VALUES (?,?,?,?,?)", (movie_name,movie_price,movie_time,theatre,theatre_tickets))
             print("\n***Movie succesfully added***")
             connection.commit()
         else:
@@ -102,10 +102,10 @@ def display_movies():
         
         #Theatre query 2 is used to acess the query when 
         if theatre == 4:
-            theatre_query = cursor.execute("SELECT movie_id,movie_name, movie_price, movie_time, movie_tickets, theatre_name FROM movies JOIN theatres ON movies.movie_theatre = theatres.theatre_id")
+            theatre_query = cursor.execute("SELECT movie_id,movie_name, movie_price, movie_time, movie_tickets, theatre_name FROM movie JOIN theatre ON movie.theatre_id = theatre.theatre_id")
         #Number selection
         else:  
-            theatre_query = cursor.execute("SELECT movie_id, movie_name, movie_price, movie_time, movie_tickets, theatre_name FROM movies JOIN theatres ON movies.movie_theatre = theatres.theatre_id WHERE movie_theatre = ?", (theatre,))
+            theatre_query = cursor.execute("SELECT movie_id, movie_name, movie_price, movie_time, movie_tickets, theatre_name FROM movie JOIN theatre ON movie.theatre_id = theatre.theatre_id WHERE movie.theatre_id = ?", (theatre,))
         
         
         #Prompt user to watch a movie
@@ -159,17 +159,17 @@ def buy_tickets():
             
             #Theatre query is run again because you can only acess data once per query - kind annoying but nesscary
             if theatre == 4:
-                theatre_query = cursor.execute("SELECT movie_id,movie_name, movie_price, movie_time, movie_tickets, theatre_name FROM movies JOIN theatres ON movies.movie_theatre = theatres.theatre_id")
+                theatre_query = cursor.execute("SELECT movie_id,movie_name, movie_price, movie_time, movie_tickets, theatre_name FROM movie JOIN theatre ON movie.theatre_id = theatre.theatre_id")
             #Number selection
             else:  
-                theatre_query = cursor.execute("SELECT movie_id, movie_name, movie_price, movie_time, movie_tickets, theatre_name FROM movies JOIN theatres ON movies.movie_theatre = theatres.theatre_id WHERE movie_theatre = ?", (theatre,))                    
+                theatre_query = cursor.execute("SELECT movie_id, movie_name, movie_price, movie_time, movie_tickets, theatre_name FROM movie JOIN theatre ON movie.theatre_id = theatre.theatre_id WHERE movie.theatre_id = ?", (theatre,))                    
             
             
             #-1 for indexing
             movie_id = (theatre_query.fetchall())[movie_index-1][0]
             
             #Get the amount of tickets avaliable
-            movie_ticket_query = cursor.execute("SELECT movie_tickets,movie_price FROM movies WHERE movie_id = ?", (movie_id,))
+            movie_ticket_query = cursor.execute("SELECT movie_tickets,movie_price FROM movie WHERE movie_id = ?", (movie_id,))
             
             movie_ticket_results = movie_ticket_query.fetchone()
            
@@ -186,7 +186,7 @@ def buy_tickets():
                 buy_tickets = input()
                 if buy_tickets == "yes":
                     #Update the number of tickets
-                    cursor.execute("UPDATE movies SET movie_tickets = ? WHERE movie_id = ?", (movie_tickets,movie_id,))
+                    cursor.execute("UPDATE movie SET movie_tickets = ? WHERE movie_id = ?", (movie_tickets,movie_id,))
                     #Confirm purchase
                     print("\n***Purchase Complete***")
                     
@@ -227,10 +227,10 @@ def delete_movie():
             
                 #Theatre query is run again because you can only acess data once per query - kind annoying but nesscary
                 if theatre == 4:
-                    theatre_query = cursor.execute("SELECT movie_id,movie_name, movie_price, movie_time, movie_tickets, theatre_name FROM movies JOIN theatres ON movies.movie_theatre = theatres.theatre_id")
+                    theatre_query = cursor.execute("SELECT movie_id,movie_name, movie_price, movie_time, movie_tickets, theatre_name FROM movie JOIN theatre ON movie.theatre_id = theatre.theatre_id")
                 #Number selection
                 else:  
-                    theatre_query = cursor.execute("SELECT movie_id, movie_name, movie_price, movie_time, movie_tickets, theatre_name FROM movies JOIN theatres ON movies.movie_theatre = theatres.theatre_id WHERE movie_theatre = ?", (theatre,))    
+                    theatre_query = cursor.execute("SELECT movie_id, movie_name, movie_price, movie_time, movie_tickets, theatre_name FROM movie JOIN theatre ON movie.theatre_id = theatre.theatre_id WHERE movie.theatre_id = ?", (theatre,))    
                 
                 
                 #Get the id of the movie acessed to use in queries
@@ -242,7 +242,7 @@ def delete_movie():
                 
                 if delete_movie == 'yes':
                     #Delete the record
-                    cursor.execute("DELETE FROM movies WHERE movie_id = ?",(movie_id,))
+                    cursor.execute("DELETE FROM movie WHERE movie_id = ?",(movie_id,))
                     print("\nMovie Deleted")
                     connection.commit()
                 else:
