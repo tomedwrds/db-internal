@@ -13,12 +13,9 @@ cursor = connection.cursor()
 #SQLite Foreign keys full function disabled by ddeafult. Turns them on
 connection.execute("PRAGMA foreign_keys = ON")
 
-
-
-#Insert the queries
-#cursor.execute("INSERT INTO tutor(tutor_code) VALUES ('ABC'), ('XYZ')")#
-#cursor.execute("INSERT INTO STUDENT(student_name,student_age,tutor_id) VALUES ('Amy',16,1), ('Bryan',15,1),('Charli',15,2)")
-
+#Contants
+MAX_MOVIE_NAME_LENGTH = 24
+MAX_MOVIE_PRICE = 9999
 
 
 def display_theatres():
@@ -27,12 +24,19 @@ def display_theatres():
     names = cursor.execute("SELECT theatre_name FROM theatre")
     
     #Nice formating i for side numbers
+    print("-"*26)
+    print("|{:^24}|".format("| Choose a Theatre |"))
+    print("-"*26)    
     i = 1
     for name in names:
-        print("({}) {}".format(i,name[0]))
+        print("|{:^3}|{:^20}|".format(i,name[0]))
+        print("-"*26)
         #Increment i
         i+= 1
-    
+    print("|{:^3}|{:^20}|".format(i,"Display all movies")) 
+    print("-"*26)    
+    print("|-1 |{:^20}|".format("Go back")) 
+    print("-"*26)        
 
 
 def add_movie():
@@ -41,9 +45,18 @@ def add_movie():
         print("\nAdd new movie")
         #Get the movie name
         movie_name = input("Enter movie name: ")
-        
+        #Make sure string isnt to long
+        if len(movie_name) > MAX_MOVIE_NAME_LENGTH or movie_name.isspace():
+            print("\n***Movie name to long or empty***")
+            #Error so the except is called
+            k -=1
+            
         #Get the movie price
         movie_price = int(input("Enter movie price: "))
+        if movie_price > MAX_MOVIE_PRICE:
+            print("\n***Movie price to high***")
+            #Error so the except is called
+            k -=1            
         
         #Get the movie time
         
@@ -89,8 +102,7 @@ def display_movies():
 
     #Take the user input for movies to view
     display_theatres()
-    print("(4) Display all movies")
-    print("(-1) Go back")
+   
     
     theatre = int(input("Enter movie thearte num: "))
     
@@ -110,14 +122,18 @@ def display_movies():
         
         
         #Prompt user to watch a movie
-        print("\n***Movie List***")
+        print("-"*75)
+        print("|{:^73}|".format("| Movie List |"))
+        print("-"*75)
 
         #Display the queries - i is counter 
         i = 1
         for m in theatre_query:
             theatre_tickets = m[0] 
-            print("({}) Name: {} - Price: ${} - Time: {} - Tickets: {} - Theatre: {}".format(i,m[1],m[2],m[3],m[4],m[5]))
             
+            print("|{:^3}|{:^24}|{:^20}|${:^4}|{:^5}|{:^3} Tickets|".format(i,m[1],m[5],m[2],m[3],m[4]))
+            #67 is sum of all
+            print("-"*75)
             #Increase counter
             i+= 1
         
@@ -144,7 +160,7 @@ def display_movies():
 def buy_tickets():
 
     #Display all movies
-    print("\nWhat thearte do you wish to purchase tickets for?")
+    
     
     theatre = display_movies()
     
@@ -153,7 +169,8 @@ def buy_tickets():
         
     
         #Add go back option
-        print("(-1) Cancel Transaction")            
+        print("|-1 |{:^61}|".format("Go back")) 
+        print("-"*75)          
         #Allow user to sellect the movie number
         movie_index = int(input("Enter the number: ")) 
                        
@@ -225,7 +242,7 @@ def delete_movie():
     
         
         #Display all movies
-        print("\nWhat thearte do you wish to delete movies from?")
+        
         theatre = display_movies()
         
        
@@ -234,7 +251,8 @@ def delete_movie():
                        
     
             #Add go back option
-            print("(-1) Cancel Transaction")            
+            print("|-1 |{:^61}|".format("Go back")) 
+            print("-"*75)         
             #Allow user to sellect the movie number 
             movie_index = int(input("Enter the number: ")) 
            
@@ -294,7 +312,6 @@ while running:
         elif option == 3:
             delete_movie()
         elif option == 4:
-            print("\nWhat theatre do you wish to view movies from")
             display_movies()
             
         
