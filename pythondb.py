@@ -290,16 +290,41 @@ def delete_movie():
             
                 
  
-#Program running   
+#Program running
+
+#User login
+login = True
+while login:
+    #Intro message
+    print("Welcome to Tickets'R'Us")
+    username = input("Enter username: ")
+    password = input("Enter password: ")
+
+    login_query = cursor.execute("SELECT user_admin FROM user WHERE user_name = ? and user_password = ?", (username,password,))
+    data = login_query.fetchall()
+    if len(data) != 0:
+        #Set user admin
+        user_admin = data[0][0]
+        print("\nSuccesfully Logged In")
+        login = False
+        
+    else:
+        print("\nIncorrect Data Entered\n")
+    
+    
+
 running = True
 while running:
     try:
         #Options
         print("\nWhat do you wish to do?")
         print("(1) Buy Tickets")
-        print("(2) Add Movies")
-        print("(3) Delete Movies")
-        print("(4) Display Movies")
+        print("(2) Display Movies")
+        #Only dissplay options if admin
+        if user_admin:
+            print("(3) Add Movies")
+            print("(4) Delete Movies")
+       
         print("(-1) Exit")
         option = int(input("Enter option number: "))
         
@@ -308,13 +333,16 @@ while running:
         elif option == 1:
             buy_tickets()
         elif option == 2:
-            add_movie()
-        elif option == 3:
-            delete_movie()
-        elif option == 4:
-            display_movies()
-            
-        
+            display_movies() 
+        elif user_admin:
+            if option == 3:
+                add_movie()
+            elif option == 4:
+                delete_movie()
+            else:
+                print("\n***Input error please retry***")
+        else:
+            print("\n***Input error please retry***")
             
     
     except:  
@@ -323,37 +351,3 @@ while running:
     
     
 
-#Need to commit to db to make records permanent otherwise they dont last beyond runtime
-
-
-"""
-#Update
-cursor.execute("UPDATE student SET student_name = 'Tom' WHERE student_id = 1")
-
-
-show_all_students()
-#Delete student
-delete_student = input(("Enter name of students you want to delete: "))
-cursor.execute("DELETE FROM student WHERE student_name = ?", (delete_student,))
-
-show_all_students()
-
-#Add a new student
-new_name = input("Enter student name: ")
-new_age = int(input("Enter student age: "))
-print("What tutor group are they in?")
-tutor_groups = cursor.execute("SELECT tutor_id, tutor_code FROM tutor")
-for tutor in tutor_groups:
-    print(tutor[0], tutor[1])
-new_tutor = int(input(": "))
-cursor.execute("INSERT INTO student (student_name, student_age, tutor_id) VALUES (?,?,?)", (new_name,new_age,new_tutor))
-
-show_all_students()
-
-#Need to commit to db to make records permanent otherwise they dont last beyond runtime
-connection.commit()
-
-
-
-    
-  """
