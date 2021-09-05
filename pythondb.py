@@ -17,8 +17,13 @@ connection.execute("PRAGMA foreign_keys = ON")
 MAX_MOVIE_NAME_LENGTH = 24
 MAX_MOVIE_PRICE = 9999
 
+theatre_amount_query = cursor.execute("SELECT theatre_name FROM theatre")
+THEATRE_AMOUNT = len(theatre_amount_query.fetchall())
 
-def display_theatres():
+print(THEATRE_AMOUNT)
+
+
+def display_theatres(extra_options):
     #Select name of all students
     #Set names as an arry contatining all names
     names = cursor.execute("SELECT theatre_name FROM theatre")
@@ -33,88 +38,93 @@ def display_theatres():
         print("-"*26)
         #Increment i
         i+= 1
-    print("|{:^3}|{:^20}|".format(i,"Display all movies")) 
-    print("-"*26)    
-    print("|-1 |{:^20}|".format("Go back")) 
-    print("-"*26)        
-
-
-def add_movie():
     
-   
-        print("\nAdd new movie")
-        #Get the movie name
-        movie_name = input("Enter movie name: ")
-        #Make sure string isnt to long
-        if len(movie_name) > MAX_MOVIE_NAME_LENGTH or movie_name.isspace():
-            print("\n***Movie name to long or empty***")
-            #Error so the except is called
-            k -=1
-            
+    #add extra options if wanted
+    if extra_options == True:
+        print("|{:^3}|{:^20}|".format(i,"Display all movies")) 
+        print("-"*26)    
+        print("|-1 |{:^20}|".format("Go back")) 
+        print("-"*26)        
+
+    return i-1
+def add_movie():
+    #title
+    print("\nAdd new movie")
+    
+    #Get the movie name
+    movie_name = input("Enter movie name: ")
+    
+    #Make sure string isnt to long
+    if len(movie_name) < MAX_MOVIE_NAME_LENGTH and (movie_name.isspace() == False and movie_name != ""):
+        
         #Get the movie price
         movie_price = int(input("Enter movie price: "))
-        if movie_price > MAX_MOVIE_PRICE:
-            print("\n***Movie price to high***")
-            #Error so the except is called
-            k -=1            
-        
-        #Get the movie time
-        
-        #haha time_input[0] is hours and time_input[1] is minutes
-        time_input = list(map(int,(input("Enter movie time in format HH:MM: ").split(":"))))
-       
-        
-        #make sure hours is between 0 and 23 and time is between 0 and 59
-        if (time_input[0] >= 0 and time_input[0] <= 23) and (time_input[1] >= 0 and time_input[1] <= 59):
-            movie_time = "{:02d}:{:02d}".format(time_input[0],time_input[1])
-        else: 
-            #Make an error cause im lazy so just calls try except
-            k -=1
-        
-        #Get the movie thearte
-        display_theatres()
-        theatre = int(input("Enter movie thearte num: "))
-        if theatre >= 1 and theatre <= 3:
-            theatre_query = cursor.execute("SELECT theatre_tickets, theatre_name FROM theatre WHERE theatre_id = ?", (theatre,))
+        if movie_price <= MAX_MOVIE_PRICE and movie_price > 0:
             
-            theatre_query_results = theatre_query.fetchone()
-            theatre_tickets = theatre_query_results[0]
-            theatre_name = theatre_query_results[1]
-        
-        #Confirmation
-        print("\nDo you wish to confirm the adding of this movie to the DB:")
-        print("Name: {} - Price: ${} - Time: {} - Tickets: {} - Theatre: {}".format(movie_name,movie_price,movie_time,theatre_tickets,theatre_name))  
-        confirm_movie = input("Type 'yes' to confirm: ")
-        
-        if confirm_movie == "yes":
- 
-            #Execute the query    
-            cursor.execute("INSERT INTO movie (movie_name, movie_price, movie_time,theatre_id,movie_tickets) VALUES (?,?,?,?,?)", (movie_name,movie_price,movie_time,theatre,theatre_tickets))
-            print("\n***Movie succesfully added***")
-            connection.commit()
+            #Get the movie time
+            
+            #haha time_input[0] is hours and time_input[1] is minutes
+            time_input = list(map(int,(input("Enter movie time in format HH:MM: ").split(":"))))
+           
+            
+            #make sure hours is between 0 and 23 and time is between 0 and 59
+            if (time_input[0] >= 0 and time_input[0] <= 23) and (time_input[1] >= 0 and time_input[1] <= 59):
+                
+                #Format movie time in string to put into db
+                movie_time = "{:02d}:{:02d}".format(time_input[0],time_input[1])
+            
+                #Get the movie thearte
+                display_theatres(False)
+                theatre = int(input("Enter movie thearte num: "))
+                if theatre >= 1 and theatre <= THEATRE_AMOUNT:
+                    theatre_query = cursor.execute("SELECT theatre_tickets, theatre_name FROM theatre WHERE theatre_id = ?", (theatre,))
+                    
+                    theatre_query_results = theatre_query.fetchone()
+                    theatre_tickets = theatre_query_results[0]
+                    theatre_name = theatre_query_results[1]
+                    
+                    #Confirmation
+                    print("\nDo you wish to confirm the adding of this movie to the DB:")
+                    print("Name: {} - Price: ${} - Time: {} - Tickets: {} - Theatre: {}".format(movie_name,movie_price,movie_time,theatre_tickets,theatre_name))  
+                    confirm_movie = input("Type 'yes' to confirm: ")
+                    
+                    if confirm_movie == "yes":
+             
+                        #Execute the query    
+                        cursor.execute("INSERT INTO movie (movie_name, movie_price, movie_time,theatre_id,movie_tickets) VALUES (?,?,?,?,?)", (movie_name,movie_price,movie_time,theatre,theatre_tickets))
+                        print("\n***Movie succesfully added***")
+                        connection.commit()
+                    else:
+                        print("\n***Action Cancelled***")                    
+                
+                else:
+                        print("\n***Input error please retry***")
+                
+            else:
+                print("\n***Movie data not formatted correctly***")
         else:
-            print("\n***Movie succesfully added***")
-       
+            print("\n***Movie price to high or to low***")
+    else:
+        print("\n***Movie name to long or empty***")
+   
 
 def display_movies():
     #Set display movies to true to make sure a movie is selected
     
 
     #Take the user input for movies to view
-    display_theatres()
+    display_theatres(True)
    
-    
     theatre = int(input("Enter movie thearte num: "))
     
     
-        
     #Make sure in search bounds
-    if theatre >= 1 and theatre <= 4:
+    if theatre >= 1 and theatre <= (THEATRE_AMOUNT+1):
         
         #Display all movies if theatre is 4
         
         #Theatre query 2 is used to acess the query when 
-        if theatre == 4:
+        if theatre == THEATRE_AMOUNT+1:
             theatre_query = cursor.execute("SELECT movie_id,movie_name, movie_price, movie_time, movie_tickets, theatre_name FROM movie JOIN theatre ON movie.theatre_id = theatre.theatre_id")
         #Number selection
         else:  
@@ -144,9 +154,9 @@ def display_movies():
         if theatre == -1:
             
             #Display error message
-            print("\n***Purchase Cancelled***")
+            print("\n***Action Cancelled***")
         else:
-            print("\n***Input error please retry***\n")
+            print("\n***Input error please retry***")
         return -1
     
            
@@ -165,21 +175,17 @@ def buy_tickets():
     theatre = display_movies()
     
     #if -1 was selected false is returned to query doesnt contineu
-    if theatre >= 1 and theatre <= 4:
-        
-    
+    if theatre >= 1 and theatre <= THEATRE_AMOUNT+1:
         #Add go back option
-        print("|-1 |{:^61}|".format("Go back")) 
+        print("|-1 |{:^69}|".format("Go back")) 
         print("-"*75)          
         #Allow user to sellect the movie number
         movie_index = int(input("Enter the number: ")) 
-                       
-        
         
         
             
         #Theatre query is run again because you can only acess data once per query - kind annoying but nesscary
-        if theatre == 4:
+        if theatre == THEATRE_AMOUNT+1:
             theatre_query = cursor.execute("SELECT movie_id,movie_name, movie_price, movie_time, movie_tickets, theatre_name FROM movie JOIN theatre ON movie.theatre_id = theatre.theatre_id")
         #Number selection
         else:  
@@ -225,12 +231,13 @@ def buy_tickets():
                     print("\n***Purchase Cancelled***") 
                     
             else: 
-                print("***\nInput Error To many tickets purchased or less than 0 tickets brought***")
+                print("\n***Input Error - To many or to few tickets purchased***")
         else:
-            print("***\nInput Error - Ticket index outside bounds***")
-    else: 
-        print("\n***Purchase Cancelled***")            
-           
+            if movie_index == -1:
+                print("\n***Purchase Cancelled***")
+            else:
+                print("\n***Input Error - Ticket index outside bounds***")
+    
             
            
 
@@ -247,17 +254,17 @@ def delete_movie():
         
        
         #if -1 was selected false is returned to query doesnt contineu
-        if theatre >= 1 and theatre <= 4:
+        if theatre >= 1 and theatre <= THEATRE_AMOUNT+1:
                        
     
             #Add go back option
-            print("|-1 |{:^61}|".format("Go back")) 
+            print("|-1 |{:^69}|".format("Go back")) 
             print("-"*75)         
             #Allow user to sellect the movie number 
             movie_index = int(input("Enter the number: ")) 
            
             #Theatre query is run again because you can only acess data once per query - kind annoying but nesscary
-            if theatre == 4:
+            if theatre == THEATRE_AMOUNT+1:
                 theatre_query = cursor.execute("SELECT movie_id,movie_name, movie_price, movie_time, movie_tickets, theatre_name FROM movie JOIN theatre ON movie.theatre_id = theatre.theatre_id")
             #Number selection
             else:  
@@ -281,7 +288,7 @@ def delete_movie():
                 if delete_movie == 'yes':
                     #Delete the record
                     cursor.execute("DELETE FROM movie WHERE movie_id = ?",(movie_id,))
-                    print("\nMovie Deleted")
+                    print("\n***Movie Deleted***")
                     connection.commit()
                 else:
                     print("\n***Deletion cancelled***")
@@ -294,9 +301,9 @@ def delete_movie():
 
 #User login
 login = True
+print("Welcome to Tickets'R'Us")
 while login:
     #Intro message
-    print("Welcome to Tickets'R'Us")
     username = input("Enter username: ")
     password = input("Enter password: ")
 
@@ -309,7 +316,7 @@ while login:
         login = False
         
     else:
-        print("\nIncorrect Data Entered\n")
+        print("\nLogin Failed - Invalid Username/Password\n")
     
     
 
@@ -347,7 +354,7 @@ while running:
     
     except:  
         #Display error message
-        print("\n***Input error please retry***\n")
+        print("\n***Input error please retry***")
     
     
 
