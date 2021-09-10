@@ -17,10 +17,9 @@ connection.execute("PRAGMA foreign_keys = ON")
 MAX_MOVIE_NAME_LENGTH = 24
 MAX_MOVIE_PRICE = 9999
 
+
 theatre_amount_query = cursor.execute("SELECT theatre_name FROM theatre")
 THEATRE_AMOUNT = len(theatre_amount_query.fetchall())
-
-print(THEATRE_AMOUNT)
 
 
 def display_theatres(extra_options):
@@ -73,9 +72,9 @@ def add_movie():
                 #Format movie time in string to put into db
                 movie_time = "{:02d}:{:02d}".format(time_input[0],time_input[1])
             
-                #Get the movie thearte
+                #Get the movie theatre
                 display_theatres(False)
-                theatre = int(input("Enter movie thearte num: "))
+                theatre = int(input("Enter movie theatre num: "))
                 if theatre >= 1 and theatre <= THEATRE_AMOUNT:
                     theatre_query = cursor.execute("SELECT theatre_tickets, theatre_name FROM theatre WHERE theatre_id = ?", (theatre,))
                     
@@ -103,9 +102,9 @@ def add_movie():
             else:
                 print("\n***Movie data not formatted correctly***")
         else:
-            print("\n***Movie price to high or to low***")
+            print("\n***Movie price too high or too low***")
     else:
-        print("\n***Movie name to long or empty***")
+        print("\n***Movie name too long or empty***")
    
 
 def display_movies():
@@ -115,7 +114,7 @@ def display_movies():
     #Take the user input for movies to view
     display_theatres(True)
    
-    theatre = int(input("Enter movie thearte num: "))
+    theatre = int(input("Enter the num of the theatre you wish to view movies from: "))
     
     
     #Make sure in search bounds
@@ -231,7 +230,7 @@ def buy_tickets():
                     print("\n***Purchase Cancelled***") 
                     
             else: 
-                print("\n***Input Error - To many or to few tickets purchased***")
+                print("\n***Input Error - Too many or too few tickets purchased***")
         else:
             if movie_index == -1:
                 print("\n***Purchase Cancelled***")
@@ -302,6 +301,7 @@ def delete_movie():
 #User login
 login = True
 print("Welcome to Tickets'R'Us")
+
 while login:
     #Intro message
     username = input("Enter username: ")
