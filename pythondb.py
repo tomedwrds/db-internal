@@ -1,5 +1,11 @@
-#Import the sqlitle library
+#Import the sqlitle library and hasing librriies
 import sqlite3
+import hashlib
+import os
+
+
+
+
 
 #Define database we will use, if it doesnt exist it'll create a new one
 DATABASE = 'internal.db'
@@ -12,6 +18,8 @@ cursor = connection.cursor()
 
 #SQLite Foreign keys full function disabled by ddeafult. Turns them on
 connection.execute("PRAGMA foreign_keys = ON")
+
+connection.commit()
 
 #Contants
 MAX_MOVIE_NAME_LENGTH = 24
@@ -303,18 +311,38 @@ login = True
 print("Welcome to Tickets'R'Us")
 
 while login:
+    
+    
+    
+    
     #Intro message
     username = input("Enter username: ")
     password = input("Enter password: ")
 
-    login_query = cursor.execute("SELECT user_admin FROM user WHERE user_name = ? and user_password = ?", (username,password,))
+    #Hash the password than compare it to stored hashed password
+    salt = os.urandom(32)    
+    password_hashed = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt, 100000)    
+    
+    
+    login_query = cursor.execute("SELECT user_admin, user_password, user_salt FROM user WHERE user_name = ?", (username,))
     data = login_query.fetchall()
+    
+    #Check if any data has returned
     if len(data) != 0:
-        #Set user admin
-        user_admin = data[0][0]
-        print("\nSuccesfully Logged In")
-        login = False
         
+        #Hash the password then compare it to the returned password
+        password_hashed = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), data[0][2], 100000)   
+        
+        if password_hashed == data[0][1]:
+        
+            #Set admin status
+            user_admin = data[0][0]
+            print("\nSuccesfully Logged In")
+            
+            #Exit the while loop
+            login = False
+        else:
+            print("\nLogin Failed - Invalid Username/Password\n")
     else:
         print("\nLogin Failed - Invalid Username/Password\n")
     
