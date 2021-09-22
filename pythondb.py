@@ -319,9 +319,6 @@ while login:
     username = input("Enter username: ")
     password = input("Enter password: ")
 
-    #Hash the password than compare it to stored hashed password
-    salt = os.urandom(32)    
-    password_hashed = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt, 100000)    
     
     
     login_query = cursor.execute("SELECT user_admin, user_password, user_salt FROM user WHERE user_name = ?", (username,))
